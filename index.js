@@ -6,15 +6,41 @@ const canvas2 = evanbrosce.init('canvas2', 250, 250);
 //////////////
 // CANVAS 1 //
 //////////////
+let geometric = {};
 const load1 = () => {
 	canvas1.loadImage('img', './img.png');
+	geometric.p1 = [10, 30];
+	geometric.p2 = [240, 30];
+	geometric.p3 = [50, 220];
+	geometric.p4 = [200, 220];
 }
 
 const update1 = () => {
 }
 
 const render1 = () => {
-	canvas1.draw.image(canvas1.assets['img'], {x:0, y:0});
+	canvas1.draw.image(canvas1.assets['img'], {x:50, y:50, width: 150, height:150});
+	canvas1.draw.setColor('red');
+	canvas1.draw.path(
+		{
+			x: [
+				geometric.p1[0],
+				geometric.p2[0],
+				geometric.p4[0],
+				geometric.p3[0],
+				geometric.p1[0]
+			], 
+			y: [
+				geometric.p1[1], 
+				geometric.p2[1], 
+				geometric.p4[1], 
+				geometric.p3[1], 
+				geometric.p1[1]
+			]
+		}, 
+		1, 
+		'stroke'
+	)
 }
 
 //////////////
