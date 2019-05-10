@@ -1,14 +1,19 @@
 window.onload = function () {
 	var canvas = document.getElementById('canvas');
 	var ctx = canvas.getContext('2d');
+	var webgl = document.getElementById('webgl');
+	var ctxW = webgl.getContext('2d');
 	var up = false;
 	var down = false;
 	var left = false;
 	var right = false;
 
+	var myImg = new Image();
+	myImg.src = './img.png';
+
 	var cam = {
-		x: 400,
-		y: 400,
+		x: 200,
+		y: 200,
 		z: 500
 	}
 	
@@ -36,7 +41,7 @@ window.onload = function () {
 	});
 	
 	loop();
-	
+
 	function configKeyboardKeys(keys) {
 		document.addEventListener('keydown', handlerKeyDown, false);
 		document.addEventListener('keyup', handlerKeyUp, false);
@@ -91,14 +96,37 @@ window.onload = function () {
 	
 	function draw() {
 		cleanCanvas();
+		ctx.drawImage(myImg, cam.x-myImg.width/2, cam.y-myImg.height/2);
 		var points = calculatePointsPositionInZeroZ();
 		drawPathIntoSquare(square);
 		drawPathIntoPoints(points);
 		drawPoints(points);
+
+		var data = getImageDataFromProjection(points);
+		drawInWEBGLcanvas(data);
+	}
+
+	function getImageDataFromProjection(p) {
+		var data = [];
+		// for(var j = p.a.y; j < p.c.y; j++) {
+		// 	for(var i = p.a.x; i < p.b.x; i++) {
+		// 		data.push(ctx.getImageData(i,j, 1, 1));
+		// 	}
+		// }
+		return data;
+	}
+
+	function drawInWEBGLcanvas(data) {
+		// for(var j = 0; j < webgl.height; j++) {
+		// 	for(var i = 0; i < webgl.width; i++) {
+		// 		ctxW.putImageData(data[i] , i, j);
+		// 	}
+		// }
 	}
 
 	function cleanCanvas() {
 		ctx.clearRect(0, 0, canvas.width, canvas.height)
+		ctxW.clearRect(0, 0, canvas.width, canvas.height)
 	}
 	
 	function drawPathIntoSquare(points) {
