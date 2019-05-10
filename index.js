@@ -1,33 +1,117 @@
 window.onload = function () {
 	var canvas = document.getElementById('canvas');
 	var ctx = canvas.getContext('2d');
+	var up = false;
+	var down = false;
+	var left = false;
+	var right = false;
 
 	var cam = {
 		x: 400,
 		y: 400,
-		z: 100
+		z: 500
 	}
 	
 	var square = {
-		xA: cam.x-100,
-		xB: cam.x+100,
-		xC: cam.x+100,
-		xD: cam.x-100,
-		yA: cam.y-150,
-		yB: cam.y-150,
-		yC: cam.y+10,
-		yD: cam.y+10,
-		zA: cam.z-50,
-		zB: cam.z-50,
-		zC: cam.z-100,
-		zD: cam.z-100,
+		xA: cam.x-50,
+		xB: cam.x+50,
+		xC: cam.x+50,
+		xD: cam.x-50,
+		yA: cam.y-50,
+		yB: cam.y-50,
+		yC: cam.y+50,
+		yD: cam.y+50,
+		zA: cam.z-200,
+		zB: cam.z-200,
+		zC: cam.z-200,
+		zD: cam.z-200,
+		angle: 0
+	}
+		
+	configKeyboardKeys({
+		87: {press: function () {up = true}, release: function() {up = false}},
+		83: {press: function () {down = true}, release: function() {down = false}},
+		65: {press: function () {left = true}, release: function() {left = false}},
+		68: {press: function () {right = true}, release: function() {right = false}},
+	});
+	
+	loop();
+	
+	function configKeyboardKeys(keys) {
+		document.addEventListener('keydown', handlerKeyDown, false);
+		document.addEventListener('keyup', handlerKeyUp, false);
+		
+		function handlerKeyDown(evt) {
+			if(evt.keyCode in keys) {
+				keys[evt.keyCode].press();
+			}
+		}
+
+		function handlerKeyUp(evt) {
+			if(evt.keyCode in keys) {
+				keys[evt.keyCode].release();
+			}
+		}
+	}
+
+	function loop() {
+		update();
+		draw();
+		window.requestAnimationFrame(loop);
+	}
+
+	function update() {
+		if(up) {
+			square.zA++;
+			square.zB++;
+			square.zC--;
+			square.zD--;
+		}
+		if(down) {
+			square.zA--;
+			square.zB--;
+			square.zC++;
+			square.zD++;
+		}
+		if(left) {
+			var cos = Math.cos(Math.PI/180),
+				sin = Math.sin(Math.PI/180);
+				ctx.translate(cam.x, cam.y);
+				ctx.transform(cos, -sin, sin, cos, 0, 0);
+				ctx.translate(-cam.x, -cam.y);
+		}
+		if(right) {
+			var cos = Math.cos(Math.PI/180),
+				sin = Math.sin(Math.PI/180);
+				ctx.translate(cam.x, cam.y);
+				ctx.transform(cos, sin, -sin, cos, 0, 0);
+				ctx.translate(-cam.x, -cam.y);
+		}
 	}
 	
-	var points = calculatePointsPositionInZeroZ();
-	console.log(points);
-	drawPathIntoPoints(points);
-	drawPoints(points);
+	function draw() {
+		cleanCanvas();
+		var points = calculatePointsPositionInZeroZ();
+		drawPathIntoSquare(square);
+		drawPathIntoPoints(points);
+		drawPoints(points);
+	}
+
+	function cleanCanvas() {
+		ctx.clearRect(0, 0, canvas.width, canvas.height)
+	}
 	
+	function drawPathIntoSquare(points) {
+		ctx.strokeStyle = 'red';
+		ctx.beginPath();
+		ctx.moveTo(points.xA, points.yA);
+    ctx.lineTo(points.xB, points.yB);
+    ctx.lineTo(points.xC, points.yC);
+    ctx.lineTo(points.xD, points.yD);
+		ctx.closePath();
+		ctx.stroke();
+	}
+
 	function drawPathIntoPoints(points) {
 		ctx.strokeStyle = 'white';
 		ctx.beginPath();
