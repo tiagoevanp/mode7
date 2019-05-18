@@ -2,7 +2,7 @@ window.onload = function () {
 	var canvas = document.getElementById('canvas');
 	var ctx = canvas.getContext('2d');
 	var webgl = document.getElementById('webgl');
-	var ctxW = webgl.getContext('2d');
+	var gl = webgl.getContext('webgl');
 	var up = false;
 	var down = false;
 	var left = false;
@@ -96,7 +96,7 @@ window.onload = function () {
 	
 	function draw() {
 		cleanCanvas();
-		ctx.drawImage(myImg, cam.x-myImg.width/2, cam.y-myImg.height/2);
+		ctx.drawImage(myImg, 0, 0, canvas.width, canvas.height);
 		var points = calculatePointsPositionInZeroZ();
 		drawPathIntoSquare(square);
 		drawPathIntoPoints(points);
@@ -117,16 +117,232 @@ window.onload = function () {
 	}
 
 	function drawInWEBGLcanvas(data) {
-		// for(var j = 0; j < webgl.height; j++) {
-		// 	for(var i = 0; i < webgl.width; i++) {
-		// 		ctxW.putImageData(data[i] , i, j);
-		// 	}
-		// }
+		gl.clearColor(0.0, 0.0, 0.0, 1.0);
+		gl.clear(gl.COLOR_BUFFER_BIT);
+		drawGL(data)
+	}
+
+	function drawGL(data) {
+		const canvas = document.getElementById("webgl");
+		const gl = canvas.getContext("webgl");
+		
+		const vsSource = `
+			attribute vec4 aVertexPosition;
+			attribute vec2 aTextureCoord;
+			
+			varying highp vec2 vTextureCoord;
+
+			void main() {
+				gl_Position = aVertexPosition;
+				vTextureCoord = aTextureCoord;
+			}
+		`;
+
+		const fsSource = `
+			varying highp vec2 vTextureCoord;
+			uniform sampler2D uSampler;
+			
+			void main() {
+				gl_FragColor = texture2D(uSampler, vTextureCoord);
+			}
+		`;
+
+		const shaderProgram = initShaderProgram(gl, vsSource, fsSource);
+
+		const programInfo = {
+			program: shaderProgram,
+			attribLocations: {
+				vertexPosition: gl.getAttribLocation(shaderProgram, 'aVertexPosition'),
+				textureCoord: gl.getAttribLocation(shaderProgram, 'aTextureCoord'),
+			},
+			uniformLocations: {
+				uSampler: gl.getUniformLocation(shaderProgram, 'uSampler'),
+			},
+		};
+
+		const buffers = initBuffers(gl, data);
+		
+		drawScene(gl, programInfo, buffers);
+	}
+
+	function loadTexture(gl, url) {
+		const texture = gl.createTexture();
+		gl.bindTexture(gl.TEXTURE_2D, texture);
+	
+		const level = 0;
+		const internalFormat = gl.RGBA;
+		const width = 1;
+		const height = 1;
+		const border = 0;
+		const srcFormat = gl.RGBA;
+		const srcType = gl.UNSIGNED_BYTE;
+		const pixel = new Uint8Array([0, 0, 255, 255]);  // opaque blue
+		const image = new Image();
+		image.src = url;
+
+		gl.texImage2D(gl.TEXTURE_2D, level, internalFormat, width, height, border, srcFormat, srcType, pixel);
+		
+		gl.bindTexture(gl.TEXTURE_2D, texture);
+		gl.texImage2D(gl.TEXTURE_2D, level, internalFormat, srcFormat, srcType, image);
+
+		if (isPowerOf2(image.width) && isPowerOf2(image.height)) {
+			gl.generateMipmap(gl.TEXTURE_2D);
+		} else {
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+		}
+	
+		return texture;
+	}
+	
+	function isPowerOf2(value) {
+		return (value & (value - 1)) == 0;
+	}
+
+	function drawScene(gl, programInfo, buffers) {
+		gl.clearColor(0.0, 0.0, 0.0, 1.0);  // Clear to black, fully opaque
+		gl.clearDepth(1.0);                 // Clear everything
+		gl.enable(gl.DEPTH_TEST);           // Enable depth testing
+		gl.depthFunc(gl.LEQUAL);            // Near things obscure far things
+	
+	
+		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+	
+		const fieldOfView = 45 * Math.PI / 180;   // in radians
+		const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
+		const zNear = 0.1;
+		const zFar = 100.0;
+		const projectionMatrix = mat4.create();
+		const texture = loadTexture(gl, 'img.png');
+
+		mat4.perspective(projectionMatrix,
+										 fieldOfView,
+										 aspect,
+										 zNear,
+										 zFar);
+	
+
+		const modelViewMatrix = mat4.create();
+	
+		mat4.translate(modelViewMatrix,     // destination matrix
+									 modelViewMatrix,     // matrix to translate
+									 [-0.0, 0.0, -6.0]);  // amount to translate
+
+		{
+			const numComponents = 2;
+			const type = gl.FLOAT;
+			const normalize = false;
+			const stride = 0;
+			const offset = 0;
+			gl.bindBuffer(gl.ARRAY_BUFFER, buffers.position);
+			gl.vertexAttribPointer(
+					programInfo.attribLocations.vertexPosition,
+					numComponents,
+					type,
+					normalize,
+					stride,
+					offset);
+			gl.enableVertexAttribArray(
+					programInfo.attribLocations.vertexPosition);
+		}
+	
+		{
+			const numComponents = 2;
+			const type = gl.FLOAT;
+			const normalize = false;
+			const stride = 0;
+			const offset = 0;
+			gl.bindBuffer(gl.ARRAY_BUFFER, buffers.textureCoord);
+			gl.vertexAttribPointer(
+					programInfo.attribLocations.textureCoord,
+					numComponents,
+					type,
+					normalize,
+					stride,
+					offset);
+			gl.enableVertexAttribArray(
+					programInfo.attribLocations.textureCoord);
+		}
+	
+		gl.useProgram(programInfo.program);
+	
+		{
+			const offset = 0;
+			const vertexCount = 4;
+			gl.drawArrays(gl.TRIANGLE_STRIP, offset, vertexCount);
+		}
+
+		gl.activeTexture(gl.TEXTURE0);
+		gl.bindTexture(gl.TEXTURE_2D, texture);
+		gl.uniform1i(programInfo.uniformLocations.uSampler, 0);
+	}
+
+	function initBuffers(gl, data) {
+
+		const positionBuffer = gl.createBuffer();
+	
+		gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+	
+		const positions = [
+		-1.0,  1.0,
+		 1.0,  1.0,
+    -1.0, -1.0,
+     1.0, -1.0,
+		];
+
+		gl.bufferData(gl.ARRAY_BUFFER,
+									new Float32Array(positions),
+									gl.STATIC_DRAW);
+
+		const textureCoordBuffer = gl.createBuffer();
+		gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordBuffer);
+
+		const textureCoordinates = [
+		0.5,  1.0,
+		1.0,  1.0,
+    0.0, 0.0,
+    1.0, 0.0,
+		];
+
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoordinates),
+								gl.STATIC_DRAW);
+								
+	
+		return {
+			position: positionBuffer,
+			textureCoord: textureCoordBuffer,
+		};
+	}
+
+	function initShaderProgram(gl, vsSource, fsSource) {
+		const vertexShader = loadShader(gl, gl.VERTEX_SHADER, vsSource);
+		const fragmentShader = loadShader(gl, gl.FRAGMENT_SHADER, fsSource);
+	
+		const shaderProgram = gl.createProgram();
+		gl.attachShader(shaderProgram, vertexShader);
+		gl.attachShader(shaderProgram, fragmentShader);
+		gl.linkProgram(shaderProgram);
+	
+		if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+			alert('Unable to initialize the shader program: ' + gl.getProgramInfoLog(shaderProgram));
+			return null;
+		}
+	
+		return shaderProgram;
+	}
+	
+	function loadShader(gl, type, source) {
+		const shader = gl.createShader(type);
+	
+		gl.shaderSource(shader, source);
+		gl.compileShader(shader);
+	
+		return shader;
 	}
 
 	function cleanCanvas() {
 		ctx.clearRect(0, 0, canvas.width, canvas.height)
-		ctxW.clearRect(0, 0, canvas.width, canvas.height)
 	}
 	
 	function drawPathIntoSquare(points) {
