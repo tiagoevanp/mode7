@@ -22,16 +22,16 @@ function fs() {
 			return h/w;
 		}
 
-		vec2 xy(vec2 p1, vec2 p2, float x) {
+		vec2 xy(vec2 p1, vec2 p2, float x, float y) {
 			float r = relation(p1, p2);
-			float y = p1.y + (x-p1.x)*r;
+			float y2 = p1.y + (x-p1.x)*r;
 			float x2 = p1.x + (y-p1.y)/r;
-			return vec2(x2, y);
+			return vec2(x2, y2);
 		}
 
 		vec2 calculatePointsPosition(vec2 st) {
-			vec2 D_A = xy(pD, pA, pD.x);
-			vec2 C_B = xy(pC, pB, pC.x);
+			vec2 D_A = xy(pD, pA, pD.x, pA.y);
+			vec2 C_B = xy(pC, pB, pC.x, pB.y);
 			float x = D_A.x+st.x*(C_B.x-D_A.x);
 			float y = D_A.y+st.y*(pA.y-D_A.y);
 
