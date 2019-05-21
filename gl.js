@@ -2,8 +2,9 @@ var container;
 var camera, scene, renderer;
 var uniforms;
 var texture;
-var points;
 var matrix;
+var points;
+var percentPoints;
 var size = 0.01;
 
 init();
@@ -65,23 +66,36 @@ function init() {
 }
 
 function animate() {
-		requestAnimationFrame( animate );
-		render();
-	}
-	
-	function render() {
-		points = calculatePointsPositionInZeroZ();
-		
-		uniforms.u_points.value[0].x = points.a.x/1000;
-		uniforms.u_points.value[0].y = points.a.y/1000;
-		uniforms.u_points.value[1].x = points.b.x/1000;
-		uniforms.u_points.value[1].y = points.b.y/1000;
-		uniforms.u_points.value[2].x = points.c.x/1000;
-		uniforms.u_points.value[2].y = points.c.y/1000;
-		uniforms.u_points.value[3].x = points.d.x/1000;
-		uniforms.u_points.value[3].y = points.d.y/1000;
+	requestAnimationFrame( animate );
+	render();
+}
 
+function calculatePercentageOfPoints(p, img) {
+	percents = {};
+	percents.a = { x: p.a.x/img.width, y: (img.height - p.a.y)/img.height };
+	percents.b = { x: p.b.x/img.width, y: (img.height - p.b.y)/img.height };
+	percents.c = { x: p.c.x/img.width, y: (img.height - p.c.y)/img.height };
+	percents.d = { x: p.d.x/img.width, y: (img.height - p.d.y)/img.height };
+	
+	return percents;
+}
+
+function render() {
+	if(texture.image) {
+
+		points = calculatePointsPositionInZeroZ();
+		percentPoints = calculatePercentageOfPoints(points, texture.image);
+		uniforms.u_points.value[0].x = percentPoints.a.x;
+		uniforms.u_points.value[0].y = percentPoints.a.y;
+		uniforms.u_points.value[1].x = percentPoints.b.x;
+		uniforms.u_points.value[1].y = percentPoints.b.y;
+		uniforms.u_points.value[2].x = percentPoints.c.x;
+		uniforms.u_points.value[2].y = percentPoints.c.y;
+		uniforms.u_points.value[3].x = percentPoints.d.x;
+		uniforms.u_points.value[3].y = percentPoints.d.y;
+		
 		uniforms.u_time.value += 0.05;
 		
 		renderer.render( scene, camera );
+	}
 }

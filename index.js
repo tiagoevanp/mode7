@@ -87,7 +87,7 @@ function update() {
 function draw() {
 	cleanCanvas();
 	
-	ctx.drawImage(myImg, 0, 0, 1800, 1800);
+	ctx.drawImage(myImg, 0, 0);
 	
 	var points = calculatePointsPositionInZeroZ();
 	
