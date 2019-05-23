@@ -17,8 +17,8 @@ function fs() {
 		vec2 pC = u_points[2];
 		vec2 pD = u_points[3];
 
-		float relation(vec2 p1, vec2 p2) {
-			float h = p2.y - p1.y;
+		float lambda(vec2 p1, vec2 p2) {
+			float h = p2.y;
 			float w = p2.x - p1.x;
 			return h/w;
 		}
