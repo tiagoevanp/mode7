@@ -16,10 +16,10 @@ var cam = {
 }
 
 var square = {
-	xA: cam.x-20,
-	xB: cam.x+20,
-	xC: cam.x+20,
-	xD: cam.x-20,
+	xA: cam.x-50,
+	xB: cam.x+50,
+	xC: cam.x+50,
+	xD: cam.x-50,
 	yA: cam.y-50,
 	yB: cam.y-50,
 	yC: cam.y+50,
