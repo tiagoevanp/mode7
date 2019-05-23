@@ -16,24 +16,25 @@ function fs() {
 		vec2 pC = u_points[2];
 		vec2 pD = u_points[3];
 
-		float relation(vec2 p1, vec2 p2) {
-			float h = p2.y - p1.y;
+		float lambda(vec2 p1, vec2 p2) {
+			float h = p2.y;
 			float w = p2.x - p1.x;
 			return h/w;
 		}
 
-		vec2 xy(vec2 p1, vec2 p2, float x, float y) {
-			float r = relation(p1, p2);
-			float y2 = p1.y + (x-p1.x)*r;
-			float x2 = p1.x + (y-p1.y)/r;
-			return vec2(x2, y2);
+		float x(vec2 p1, vec2 p2, float y) {
+			float l = lambda(p1, p2);
+			float x = p1.x - (y-p2.y)/l;
+			return x;
 		}
 
 		vec2 calculatePointsPosition(vec2 st) {
-			vec2 D_A = xy(pD, pA, pD.x, pA.y);
-			vec2 C_B = xy(pC, pB, pC.x, pB.y);
-			float x = D_A.x+st.x*(C_B.x-D_A.x);
-			float y = D_A.y+st.y*(pA.y-D_A.y);
+			float y = pD.y+(pD.y+st.y*(pA.y-pD.y))*(st.y*(pA.y-pD.y));
+			
+			float D_A = x(pD, pA, y);
+			float C_B = x(pC, pB, 1.0);
+			
+			float x = D_A+st.x/6.0;
 
 			return vec2(x, y);
 		}
