@@ -5,13 +5,14 @@ var down = false;
 var left = false;
 var right = false;
 var data;
+var matrix;
 
 var myImg = new Image();
 myImg.src = './img2.png';
 
 var cam = {
 	x: 200,
-	y: 200,
+	y: 300,
 	z: 500
 }
 
@@ -28,7 +29,7 @@ var square = {
 	zB: cam.z-300,
 	zC: cam.z-300,
 	zD: cam.z-300,
-	angle: 0
+	angle: 0.01
 }
 	
 configKeyboardKeys({
@@ -79,9 +80,40 @@ function update() {
 		square.zD++;
 	}
 	if(left) {
+		rotate('left');
 	}
 	if(right) {
+		rotate('right');
 	}
+}
+
+function rotate(direction) {
+	if(direction == 'left') {
+		square.angle+=0.01;
+	} else if(direction == 'right') {
+		square.angle-=0.01;
+	}
+		matrix = [
+			[Math.cos(square.angle), Math.sin(square.angle)],
+			[-Math.sin(square.angle), Math.cos(square.angle)],
+		];
+
+	var vectors = [
+		[-50, -50, ['xA', 'yA']],
+		[50, -50, ['xB', 'yB']],
+		[50, 50, ['xC', 'yC']],
+		[-50, 50, ['xD', 'yD']],
+	];
+	for(var i = 0; i < vectors.length; i++) {
+		multiplyMatrixWithVector(matrix, vectors[i]);
+	}
+}
+
+function multiplyMatrixWithVector(matrix, vector) {
+	var x = vector[0]*matrix[0][0] + vector[1]*matrix[0][1],
+			y = vector[0]*matrix[1][0] + vector[1]*matrix[1][1];
+	square[vector[2][0]] = x+cam.x;
+	square[vector[2][1]] = y+cam.y;
 }
 
 function draw() {
