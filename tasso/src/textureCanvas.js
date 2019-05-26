@@ -29,7 +29,7 @@ export function renderTextureCanvas() {
 	const context = textureCanvas.getContext('2d');
 	context.drawImage(textureImage, 0, 0, 400, 400);
 
-	const { cam, camSquare, projectedCamSquare } = state;
+	const { cam, camSquare } = state;
 
 	const [camU, camV] = [
 		 cam.x / textureImage.naturalWidth * 400,
@@ -55,6 +55,37 @@ export function renderTextureCanvas() {
 		camSquare.D.x / textureImage.naturalWidth * 400,
 		400 - camSquare.D.y / textureImage.naturalHeight * 400,
 	];
+
+	const projectedCamSquare = {
+		A: {},
+		B: {},
+		C: {},
+		D: {},
+	};
+
+	const lambdaA = cam.z / (cam.z - camSquare.A.z);
+	projectedCamSquare.A = {
+		x: cam.x + (camSquare.A.x - cam.x) * lambdaA,
+		y: cam.y + (camSquare.A.y - cam.y) * lambdaA,
+	};
+
+	const lambdaB = cam.z / (cam.z - camSquare.B.z);
+	projectedCamSquare.B = {
+		x: cam.x + (camSquare.B.x - cam.x) * lambdaB,
+		y: cam.y + (camSquare.B.y - cam.y) * lambdaB,
+	};
+
+	const lambdaC = cam.z / (cam.z - camSquare.C.z);
+	projectedCamSquare.C = {
+		x: cam.x + (camSquare.C.x - cam.x) * lambdaC,
+		y: cam.y + (camSquare.C.y - cam.y) * lambdaC,
+	};
+
+	const lambdaD = cam.z / (cam.z - camSquare.D.z);
+	projectedCamSquare.D = {
+		x: cam.x + (camSquare.D.x - cam.x) * lambdaD,
+		y: cam.y + (camSquare.D.y - cam.y) * lambdaD,
+	};
 
 	const [apU, apV] = [
 		projectedCamSquare.A.x / textureImage.naturalWidth * 400,
