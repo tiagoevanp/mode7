@@ -5,12 +5,12 @@ import { createWebGLCanvas, renderWebGlCanvas } from './webGlCanvas';
 const cam = {
 	x: 512,
 	y: 512,
-	z: 200,
-	squareDistance: 200,
-	viewportWidth: 100,
-	viewportHeight: 100,
-	inclination: Math.PI / 2,
-	azimuth: Math.PI / 2,
+	z: 10,
+	squareDistance: 5,
+	viewportWidth: 25,
+	viewportHeight: 25,
+	rotX: Math.PI / 3,
+	rotZ: Math.PI / 2,
 };
 
 const camSquare = {
@@ -27,59 +27,55 @@ const projectedCamSquare = {
 	D: {},
 };
 
-const square = {};
+const rotateZ = ({ x, y, z }, theta) => ({
+	x: Math.cos(theta) * x + -Math.sin(theta) * y,
+	y: Math.sin(theta) * x + Math.cos(theta) * y,
+	z,
+});
+
+const rotateX = ({ x, y, z }, theta) => ({
+	x,
+	y: Math.cos(theta) * y + -Math.sin(theta) * z,
+	z: Math.sin(theta) * y + Math.cos(theta) * z,
+})
 
 const compute = () => {
-	const camAxisX = {
-		x: Math.sin(cam.inclination) * Math.cos(cam.azimuth),
-		y: Math.sin(cam.inclination) * Math.sin(cam.azimuth),
-		z: Math.cos(cam.inclination),
-	};
+	const camAxis = rotateZ(rotateX({ x: 0, y: 0, z: -1 }, cam.rotX), cam.rotZ);
+	const camPlaneAxisX = rotateZ(rotateX({ x: 1, y: 0, z: 0 }, cam.rotX), cam.rotZ);
+	const camPlaneAxisY = rotateZ(rotateX({ x: 0, y: 1, z: 0 }, cam.rotX), cam.rotZ);
 
-	const camAxisY = {
-		x: Math.sin(Math.PI / 2) * Math.cos(cam.azimuth + Math.PI / 2),
-		y: Math.sin(Math.PI / 2) * Math.sin(cam.azimuth + Math.PI / 2),
-		z: Math.cos(Math.PI / 2),
-	};
-
-	const camAxisZ = {
-		x: Math.sin(cam.inclination + Math.PI / 2) * Math.cos(cam.azimuth),
-		y: Math.sin(cam.inclination + Math.PI / 2) * Math.sin(cam.azimuth),
-		z: Math.cos(cam.inclination + Math.PI / 2),
-	};
-
-	cam.axisX = camAxisX;
-	cam.axisY = camAxisY;
-	cam.axisZ = camAxisZ;
+	cam.axis = camAxis;
+	cam.planeAxisX = camPlaneAxisX;
+	cam.planeAxisY = camPlaneAxisY;
 
 	const vecSquare = {
-		x: -cam.squareDistance * camAxisZ.x,
-		y: -cam.squareDistance * camAxisZ.y,
-		z: -cam.squareDistance * camAxisZ.z,
+		x: cam.squareDistance * camAxis.x,
+		y: cam.squareDistance * camAxis.y,
+		z: cam.squareDistance * camAxis.z,
 	};
 
 	const vecA = {
-		x: cam.viewportWidth / 2 * -camAxisX.x + cam.viewportHeight / 2 * -camAxisY.x,
-		y: cam.viewportWidth / 2 * -camAxisX.y + cam.viewportHeight / 2 * -camAxisY.y,
-		z: cam.viewportWidth / 2 * -camAxisX.z + cam.viewportHeight / 2 * -camAxisY.z,
+		x: cam.viewportWidth / 2 * -camPlaneAxisX.x + cam.viewportHeight / 2 * -camPlaneAxisY.x,
+		y: cam.viewportWidth / 2 * -camPlaneAxisX.y + cam.viewportHeight / 2 * -camPlaneAxisY.y,
+		z: cam.viewportWidth / 2 * -camPlaneAxisX.z + cam.viewportHeight / 2 * -camPlaneAxisY.z,
 	};
 
 	const vecB = {
-		x: cam.viewportWidth / 2 * +camAxisX.x + cam.viewportHeight / 2 * -camAxisY.x,
-		y: cam.viewportWidth / 2 * +camAxisX.y + cam.viewportHeight / 2 * -camAxisY.y,
-		z: cam.viewportWidth / 2 * +camAxisX.z + cam.viewportHeight / 2 * -camAxisY.z,
+		x: cam.viewportWidth / 2 * +camPlaneAxisX.x + cam.viewportHeight / 2 * -camPlaneAxisY.x,
+		y: cam.viewportWidth / 2 * +camPlaneAxisX.y + cam.viewportHeight / 2 * -camPlaneAxisY.y,
+		z: cam.viewportWidth / 2 * +camPlaneAxisX.z + cam.viewportHeight / 2 * -camPlaneAxisY.z,
 	};
 
 	const vecC = {
-		x: cam.viewportWidth / 2 * +camAxisX.x + cam.viewportHeight / 2 * +camAxisY.x,
-		y: cam.viewportWidth / 2 * +camAxisX.y + cam.viewportHeight / 2 * +camAxisY.y,
-		z: cam.viewportWidth / 2 * +camAxisX.z + cam.viewportHeight / 2 * +camAxisY.z,
+		x: cam.viewportWidth / 2 * +camPlaneAxisX.x + cam.viewportHeight / 2 * +camPlaneAxisY.x,
+		y: cam.viewportWidth / 2 * +camPlaneAxisX.y + cam.viewportHeight / 2 * +camPlaneAxisY.y,
+		z: cam.viewportWidth / 2 * +camPlaneAxisX.z + cam.viewportHeight / 2 * +camPlaneAxisY.z,
 	};
 
 	const vecD = {
-		x: cam.viewportWidth / 2 * -camAxisX.x + cam.viewportHeight / 2 * +camAxisY.x,
-		y: cam.viewportWidth / 2 * -camAxisX.y + cam.viewportHeight / 2 * +camAxisY.y,
-		z: cam.viewportWidth / 2 * -camAxisX.z + cam.viewportHeight / 2 * +camAxisY.z,
+		x: cam.viewportWidth / 2 * -camPlaneAxisX.x + cam.viewportHeight / 2 * +camPlaneAxisY.x,
+		y: cam.viewportWidth / 2 * -camPlaneAxisX.y + cam.viewportHeight / 2 * +camPlaneAxisY.y,
+		z: cam.viewportWidth / 2 * -camPlaneAxisX.z + cam.viewportHeight / 2 * +camPlaneAxisY.z,
 	};
 
 	camSquare.A = {
@@ -106,79 +102,29 @@ const compute = () => {
 		z: cam.z + vecSquare.z + vecD.z,
 	};
 
-	const distCamToAny = Math.sqrt(
-		Math.pow(camSquare.A.x - cam.x, 2) +
-		Math.pow(camSquare.A.y - cam.y, 2) +
-		Math.pow(camSquare.A.z - cam.z, 2)
-	);
-
-	const vecCamToA = {
-		x: (camSquare.A.x - cam.x) / distCamToAny,
-		y: (camSquare.A.y - cam.y) / distCamToAny,
-		z: (camSquare.A.z - cam.z) / distCamToAny,
-	};
-
-	const lambdaA = cam.z / (vecCamToA.z * distCamToAny);
-
-	const vecCamToB = {
-		x: (camSquare.B.x - cam.x) / distCamToAny,
-		y: (camSquare.B.y - cam.y) / distCamToAny,
-		z: (camSquare.B.z - cam.z) / distCamToAny,
-	};
-
-	const lambdaB = cam.z / (vecCamToB.z * distCamToAny);
-
-	const vecCamToC = {
-		x: (camSquare.C.x - cam.x) / distCamToAny,
-		y: (camSquare.C.y - cam.y) / distCamToAny,
-		z: (camSquare.C.z - cam.z) / distCamToAny,
-	};
-
-	const lambdaC = cam.z / (vecCamToC.z * distCamToAny);
-
-	const vecCamToD = {
-		x: (camSquare.D.x - cam.x) / distCamToAny,
-		y: (camSquare.D.y - cam.y) / distCamToAny,
-		z: (camSquare.D.z - cam.z) / distCamToAny,
-	};
-
-	const lambdaD = cam.z / (vecCamToD.z * distCamToAny);
-
+	const lambdaA = cam.z / (cam.z - camSquare.A.z);
 	projectedCamSquare.A = {
-		x: cam.x + vecCamToA.x * distCamToAny * lambdaA,
-		y: cam.y + vecCamToA.y * distCamToAny * lambdaA,
+		x: cam.x + (camSquare.A.x - cam.x) * lambdaA,
+		y: cam.y + (camSquare.A.y - cam.y) * lambdaA,
 	};
 
+	const lambdaB = cam.z / (cam.z - camSquare.B.z);
 	projectedCamSquare.B = {
-		x: cam.x + vecCamToB.x * distCamToAny * lambdaB,
-		y: cam.y + vecCamToB.y * distCamToAny * lambdaB,
+		x: cam.x + (camSquare.B.x - cam.x) * lambdaB,
+		y: cam.y + (camSquare.B.y - cam.y) * lambdaB,
 	};
 
+	const lambdaC = cam.z / (cam.z - camSquare.C.z);
 	projectedCamSquare.C = {
-		x: cam.x + vecCamToC.x * distCamToAny * lambdaC,
-		y: cam.y + vecCamToC.y * distCamToAny * lambdaC,
+		x: cam.x + (camSquare.C.x - cam.x) * lambdaC,
+		y: cam.y + (camSquare.C.y - cam.y) * lambdaC,
 	};
 
+	const lambdaD = cam.z / (cam.z - camSquare.D.z);
 	projectedCamSquare.D = {
-		x: cam.x + vecCamToD.x * distCamToAny * lambdaD,
-		y: cam.y + vecCamToD.y * distCamToAny * lambdaD,
+		x: cam.x + (camSquare.D.x - cam.x) * lambdaD,
+		y: cam.y + (camSquare.D.y - cam.y) * lambdaD,
 	};
-
-	square.xA = camSquare.A.x;
-	square.yA = camSquare.A.y;
-	square.zA = camSquare.A.z;
-
-	square.xB = camSquare.B.x;
-	square.yB = camSquare.B.y;
-	square.zB = camSquare.B.z;
-
-	square.xC = camSquare.C.x;
-	square.yC = camSquare.C.y;
-	square.zC = camSquare.C.z;
-
-	square.xD = camSquare.D.x;
-	square.yD = camSquare.D.y;
-	square.zD = camSquare.D.z;
 };
 
 const keyPressed = {
@@ -203,10 +149,19 @@ document.addEventListener('keyup', ({ keyCode }) => {
 });
 
 const update = () => {
-	if (keyPressed.left) cam.azimuth += Math.PI / 100;
-	if (keyPressed.right) cam.azimuth -= Math.PI / 100;
-	if (keyPressed.top) cam.inclination += Math.PI / 100;
-	if (keyPressed.bottom) cam.inclination -= Math.PI / 100;
+	if (keyPressed.left) cam.rotZ += Math.PI / 100;
+	if (keyPressed.right) cam.rotZ -= Math.PI / 100;
+
+	const camAxis = rotateZ(rotateX({ x: 0, y: 0, z: -1 }, cam.rotX), cam.rotZ);
+	if (keyPressed.top) {
+		cam.x += camAxis.x * 4;
+		cam.y += camAxis.y * 4;
+	}
+
+	if (keyPressed.bottom) {
+		cam.x -= camAxis.x * 4;
+		cam.y -= camAxis.y * 4;
+	}
 
 	compute();
 
@@ -219,7 +174,6 @@ const config = {
 	cam,
 	camSquare,
 	projectedCamSquare,
-	square,
 };
 
 (async () => {

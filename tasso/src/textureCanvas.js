@@ -76,19 +76,19 @@ export function renderTextureCanvas() {
 		400 - projectedCamSquare.D.y / textureImage.naturalHeight * 400,
 	];
 
-	const [axisXU, axisXV] = [
-		(cam.x + cam.axisX.x * 100) / textureImage.naturalWidth * 400,
-		400 - (cam.y + cam.axisX.y * 100) / textureImage.naturalHeight * 400,
+	const [axisU, axisV] = [
+		(cam.x + cam.axis.x * 100) / textureImage.naturalWidth * 400,
+		400 - (cam.y + cam.axis.y * 100) / textureImage.naturalHeight * 400,
 	];
 
-	const [axisYU, axisYV] = [
-		(cam.x + cam.axisY.x * 100) / textureImage.naturalWidth * 400,
-		400 - (cam.y + cam.axisY.y * 100) / textureImage.naturalHeight * 400,
+	const [planeAxisXU, planeAxisXV] = [
+		(cam.x + cam.planeAxisX.x * 100) / textureImage.naturalWidth * 400,
+		400 - (cam.y + cam.planeAxisX.y * 100) / textureImage.naturalHeight * 400,
 	];
 
-	const [axisZU, axisZV] = [
-		(cam.x + cam.axisZ.x * 100) / textureImage.naturalWidth * 400,
-		400 - (cam.y + cam.axisZ.y * 100) / textureImage.naturalHeight * 400,
+	const [planeAxisYU, planeAxisYV] = [
+		(cam.x + cam.planeAxisY.x * 100) / textureImage.naturalWidth * 400,
+		400 - (cam.y + cam.planeAxisY.y * 100) / textureImage.naturalHeight * 400,
 	];
 
 	context.save();
@@ -98,7 +98,7 @@ export function renderTextureCanvas() {
 
 	context.beginPath();
 	context.moveTo(camU, camV);
-	context.lineTo(axisXU, axisXV);
+	context.lineTo(axisU, axisV);
 	context.stroke();
 
 	context.restore();
@@ -110,7 +110,7 @@ export function renderTextureCanvas() {
 
 	context.beginPath();
 	context.moveTo(camU, camV);
-	context.lineTo(axisYU, axisYV);
+	context.lineTo(planeAxisXU, planeAxisXV);
 	context.stroke();
 
 	context.restore();
@@ -122,7 +122,7 @@ export function renderTextureCanvas() {
 
 	context.beginPath();
 	context.moveTo(camU, camV);
-	context.lineTo(axisZU, axisZV);
+	context.lineTo(planeAxisYU, planeAxisYV);
 	context.stroke();
 
 	context.restore();

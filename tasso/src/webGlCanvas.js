@@ -7,6 +7,7 @@ import {
 	Vector2,
 	Mesh,
 	ShaderMaterial,
+	Vector3,
 } from 'three';
 import texturePath from 'file-loader!./image.png';
 import fragmentShaderPath from 'file-loader!./fragmentShader.glsl';
@@ -40,6 +41,10 @@ export async function createWebGLCanvas(initialState = {}) {
 	const geometry = new PlaneBufferGeometry(2, 2);
 
 	uniforms = {
+		u_map: {
+			type: 't',
+			value: await loadTexture(),
+		},
 		u_time: {
 			type: 'f',
 			value: 0.0,
@@ -48,18 +53,18 @@ export async function createWebGLCanvas(initialState = {}) {
 			type: 'v2',
 			value: new Vector2(renderer.domElement.width, renderer.domElement.height),
 		},
-		u_points: {
-			type: 'v2v',
-			value: [
-				new Vector2(),
-				new Vector2(),
-				new Vector2(),
-				new Vector2(),
-			],
+		u_camera: {
+			type: 'v3',
+			value: new Vector3(),
 		},
-		u_map: {
-			type: 't',
-			value: await loadTexture(),
+		u_camera_square: {
+			type: 'v3v',
+			value: [
+				new Vector3(),
+				new Vector3(),
+				new Vector3(),
+				new Vector3(),
+			],
 		},
 	};
 
@@ -130,19 +135,14 @@ export function renderWebGlCanvas() {
 		firstRenderTime = Date.now();
 	}
 
-	points = calculatePointsPositionInZeroZ();
-	percentPoints = calculatePercentageOfPoints(points, uniforms.u_map.value.image);
-
-	uniforms.u_points.value[0].x = percentPoints.a.x;
-	uniforms.u_points.value[0].y = percentPoints.a.y;
-	uniforms.u_points.value[1].x = percentPoints.b.x;
-	uniforms.u_points.value[1].y = percentPoints.b.y;
-	uniforms.u_points.value[2].x = percentPoints.c.x;
-	uniforms.u_points.value[2].y = percentPoints.c.y;
-	uniforms.u_points.value[3].x = percentPoints.d.x;
-	uniforms.u_points.value[3].y = percentPoints.d.y;
+	const { cam, camSquare } = state;
 
 	uniforms.u_time.value = (Date.now() - firstRenderTime) / 1000;
+	uniforms.u_camera.value = new Vector3(cam.x, cam.y, cam.z);
+	uniforms.u_camera_square.value[0] = new Vector3(camSquare.A.x, camSquare.A.y, camSquare.A.z);
+	uniforms.u_camera_square.value[1] = new Vector3(camSquare.B.x, camSquare.B.y, camSquare.B.z);
+	uniforms.u_camera_square.value[2] = new Vector3(camSquare.C.x, camSquare.C.y, camSquare.C.z);
+	uniforms.u_camera_square.value[3] = new Vector3(camSquare.D.x, camSquare.D.y, camSquare.D.z);
 
 	renderer.render(scene, camera);
 
