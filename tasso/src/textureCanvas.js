@@ -29,7 +29,7 @@ export function renderTextureCanvas() {
 	const context = textureCanvas.getContext('2d');
 	context.drawImage(textureImage, 0, 0, 400, 400);
 
-	const { cam, camSquare } = state;
+	const { cam, camSquare, projectedCamSquare } = state;
 
 	const [camU, camV] = [
 		 cam.x / textureImage.naturalWidth * 400,
@@ -56,9 +56,80 @@ export function renderTextureCanvas() {
 		400 - camSquare.D.y / textureImage.naturalHeight * 400,
 	];
 
+	const [apU, apV] = [
+		projectedCamSquare.A.x / textureImage.naturalWidth * 400,
+		400 - projectedCamSquare.A.y / textureImage.naturalHeight * 400,
+	];
+
+	const [bpU, bpV] = [
+		projectedCamSquare.B.x / textureImage.naturalWidth * 400,
+		400 - projectedCamSquare.B.y / textureImage.naturalHeight * 400,
+	];
+
+	const [cpU, cpV] = [
+		projectedCamSquare.C.x / textureImage.naturalWidth * 400,
+		400 - projectedCamSquare.C.y / textureImage.naturalHeight * 400,
+	];
+
+	const [dpU, dpV] = [
+		projectedCamSquare.D.x / textureImage.naturalWidth * 400,
+		400 - projectedCamSquare.D.y / textureImage.naturalHeight * 400,
+	];
+
+	const [axisXU, axisXV] = [
+		(cam.x + cam.axisX.x * 100) / textureImage.naturalWidth * 400,
+		400 - (cam.y + cam.axisX.y * 100) / textureImage.naturalHeight * 400,
+	];
+
+	const [axisYU, axisYV] = [
+		(cam.x + cam.axisY.x * 100) / textureImage.naturalWidth * 400,
+		400 - (cam.y + cam.axisY.y * 100) / textureImage.naturalHeight * 400,
+	];
+
+	const [axisZU, axisZV] = [
+		(cam.x + cam.axisZ.x * 100) / textureImage.naturalWidth * 400,
+		400 - (cam.y + cam.axisZ.y * 100) / textureImage.naturalHeight * 400,
+	];
+
 	context.save();
 
-	context.strokeStyle = 'rgba(255, 0, 0, 0.75)';
+	context.strokeStyle = 'rgba(255, 0, 0, 1)';
+	context.lineWidth = 1;
+
+	context.beginPath();
+	context.moveTo(camU, camV);
+	context.lineTo(axisXU, axisXV);
+	context.stroke();
+
+	context.restore();
+
+	context.save();
+
+	context.strokeStyle = 'rgba(0, 255, 0, 1)';
+	context.lineWidth = 1;
+
+	context.beginPath();
+	context.moveTo(camU, camV);
+	context.lineTo(axisYU, axisYV);
+	context.stroke();
+
+	context.restore();
+
+	context.save();
+
+	context.strokeStyle = 'rgba(0, 0, 255, 1)';
+	context.lineWidth = 1;
+
+	context.beginPath();
+	context.moveTo(camU, camV);
+	context.lineTo(axisZU, axisZV);
+	context.stroke();
+
+	context.restore();
+
+	context.save();
+
+	context.strokeStyle = 'rgba(255, 255, 255, 0.75)';
 	context.lineWidth = 1;
 
 	context.beginPath();
@@ -68,6 +139,8 @@ export function renderTextureCanvas() {
 	context.lineTo(dU, dV);
 	context.lineTo(aU, aV);
 	context.stroke();
+
+	context.restore();
 
 	context.save();
 
@@ -90,6 +163,39 @@ export function renderTextureCanvas() {
 	context.fillText('D', dU + 2, dV - 2);
 
 	context.restore();
+
+	context.save();
+
+	context.strokeStyle = 'rgba(0, 127, 255, 0.75)';
+	context.lineWidth = 1;
+
+	context.beginPath();
+	context.moveTo(apU, apV);
+	context.lineTo(bpU, bpV);
+	context.lineTo(cpU, cpV);
+	context.lineTo(dpU, dpV);
+	context.lineTo(apU, apV);
+	context.stroke();
+
+	context.restore();
+
+	context.save();
+
+	context.font = 'normal 1rem sans-serif';
+	context.fillStyle = 'rgb(0, 127, 255)';
+	context.shadowColor = 'black';
+	context.shadowOffsetX = 1;
+	context.shadowOffsetY = 1;
+
+	context.fillRect(apU - 2, apV - 2, 4, 4);
+	context.fillText('A\'', apU + 2, apV - 2);
+	context.fillRect(bpU - 2, bpV - 2, 4, 4);
+	context.fillText('B\'', bpU + 2, bpV - 2);
+	context.fillRect(cpU - 2, cpV - 2, 4, 4);
+	context.fillText('C\'', cpU + 2, cpV - 2);
+	context.fillRect(dpU - 2, dpV - 2, 4, 4);
+	context.fillText('D\'', dpU + 2, dpV - 2);
+
 	context.restore();
 
 	requestAnimationFrame(renderTextureCanvas);
