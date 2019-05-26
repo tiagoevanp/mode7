@@ -29,31 +29,31 @@ export function renderTextureCanvas() {
 	const context = textureCanvas.getContext('2d');
 	context.drawImage(textureImage, 0, 0, 400, 400);
 
-	const { cam, square } = state;
+	const { cam, camSquare } = state;
 
 	const [camU, camV] = [
 		 cam.x / textureImage.naturalWidth * 400,
-		 400 - cam.z / textureImage.naturalHeight * 400,
+		 400 - cam.y / textureImage.naturalHeight * 400,
 	];
 
 	const [aU, aV] = [
-		square.xA / textureImage.naturalWidth * 400,
-		400 - square.zA / textureImage.naturalHeight * 400,
+		camSquare.A.x / textureImage.naturalWidth * 400,
+		400 - camSquare.A.y / textureImage.naturalHeight * 400,
 	];
 
 	const [bU, bV] = [
-		square.xB / textureImage.naturalWidth * 400,
-		400 - square.zB / textureImage.naturalHeight * 400,
+		camSquare.B.x / textureImage.naturalWidth * 400,
+		400 - camSquare.B.y / textureImage.naturalHeight * 400,
 	];
 
 	const [cU, cV] = [
-		square.xC / textureImage.naturalWidth * 400,
-		400 - square.zC / textureImage.naturalHeight * 400,
+		camSquare.C.x / textureImage.naturalWidth * 400,
+		400 - camSquare.C.y / textureImage.naturalHeight * 400,
 	];
 
 	const [dU, dV] = [
-		square.xD / textureImage.naturalWidth * 400,
-		400 - square.zD / textureImage.naturalHeight * 400,
+		camSquare.D.x / textureImage.naturalWidth * 400,
+		400 - camSquare.D.y / textureImage.naturalHeight * 400,
 	];
 
 	context.save();
@@ -66,6 +66,7 @@ export function renderTextureCanvas() {
 	context.lineTo(bU, bV);
 	context.lineTo(cU, cV);
 	context.lineTo(dU, dV);
+	context.lineTo(aU, aV);
 	context.stroke();
 
 	context.save();

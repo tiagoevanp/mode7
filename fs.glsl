@@ -1,51 +1,45 @@
 function fs() {
 	return `
-		
+
 		#ifdef GL_ES
 			precision highp float;
 		#endif
 
 		#define USE_MAP true
+		#define PI_DIV_2 1.57079632679
 
 		uniform vec2 u_resolution;
 		uniform float u_time;
 		uniform sampler2D u_map;
 		uniform vec2 u_points[4];
+		uniform vec3 u_camera;
 
 		vec2 pA = u_points[0];
 		vec2 pB = u_points[1];
 		vec2 pC = u_points[2];
 		vec2 pD = u_points[3];
 
-		float lambda(vec2 p1, vec2 p2) {
-			float h = p2.y;
-			float w = p2.x - p1.x;
-			return h/w;
-		}
-
-		float x(vec2 p1, vec2 p2, float y) {
-			float l = lambda(p1, p2);
-			float x = p1.x - (y-p2.y)/l;
-			return x;
-		}
-
-		vec2 calculatePointsPosition(vec2 st) {
-			float y = pD.y+(pD.y+st.y*(pA.y-pD.y))*(st.y*(pA.y-pD.y));
-			
-			float D_A = x(pD, pA, y);
-			float C_B = x(pC, pB, 1.0);
-			
-			float x = D_A+st.x/6.0;
-
-			return vec2(x, y);
-		}
-
 		void main() {
 			vec2 st = gl_FragCoord.xy/u_resolution;
-			vec2 points = calculatePointsPosition(st);
 
-			gl_FragColor= texture2D(u_map, points);
+			float x = st.x;
+			vec2 pAB = x * pB + (1.0 - x) * pA;
+			vec2 pDC = x * pC + (1.0 - x) * pD;
+
+			float tanAlfa = (pDC.y - u_camera.y) / u_camera.z;
+			float tanBeta = (pAB.y - u_camera.y) / u_camera.z;
+			float alfa = atan(tanAlfa);
+			float beta = atan(tanBeta);
+			float omega = asin(st.y * sin((beta - alfa) / 2.0) + (1.0 - st.y) * sin(-(beta - alfa) / 2.0)) + alfa;
+			float tanOmega = tan(omega);
+			float y = (tanOmega - tanAlfa) / (tanBeta - tanAlfa);
+
+			vec2 pDA = y * pA + (1.0 - y) * pD;
+			vec2 pCB = y * pB + (1.0 - y) * pC;
+
+			vec2 Z = x * pCB + (1.0 - x) * pDA;
+
+			gl_FragColor = texture2D(u_map, Z);
 		}
-	
 	`;
 }

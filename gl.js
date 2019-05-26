@@ -22,7 +22,7 @@ function init() {
 
 
 		var geometry = new THREE.PlaneBufferGeometry( 2, 2 );
-		
+
 		matrix = [
 			new THREE.Vector2(),
 			new THREE.Vector2(),
@@ -35,7 +35,12 @@ function init() {
 				u_resolution: { type: "v2", value: new THREE.Vector2() },
 				u_mouse: { type: "v2", value: new THREE.Vector2() },
 				u_points: { type: "v2v",  value: matrix },
-				u_map: { type: "t", value: texture }
+				u_map: { type: "t", value: texture },
+				u_camera: { type: 'v2', value: new THREE.Vector3(
+					200.0 / 1024,
+					300.0 / 1024,
+					500.0 / 1024,
+				) },
 		};
 
 		var material = new THREE.ShaderMaterial( {
@@ -43,18 +48,18 @@ function init() {
 				vertexShader: vs(),
 				fragmentShader: fs()
 		} );
-		
+
 		// var material = new THREE.MeshBasicMaterial( { map: texture} );
 
 		var mesh = new THREE.Mesh( geometry, material );
 		scene.add( mesh );
 
 		renderer = new THREE.WebGLRenderer();
-		
+
 		renderer.setSize( 400, 400);
 		uniforms.u_resolution.value.x = renderer.domElement.width;
 		uniforms.u_resolution.value.y = renderer.domElement.height;
-		
+
 		renderer.setPixelRatio( window.devicePixelRatio );
 
 		container.appendChild( renderer.domElement );
@@ -76,7 +81,7 @@ function calculatePercentageOfPoints(p, img) {
 	percents.b = { x: p.b.x/img.width, y: (img.height - p.b.y)/img.height };
 	percents.c = { x: p.c.x/img.width, y: (img.height - p.c.y)/img.height };
 	percents.d = { x: p.d.x/img.width, y: (img.height - p.d.y)/img.height };
-	
+
 	return percents;
 }
 
@@ -93,9 +98,9 @@ function render() {
 		uniforms.u_points.value[2].y = percentPoints.c.y;
 		uniforms.u_points.value[3].x = percentPoints.d.x;
 		uniforms.u_points.value[3].y = percentPoints.d.y;
-		
+
 		uniforms.u_time.value += 0.05;
-		
+
 		renderer.render( scene, camera );
 	}
 }

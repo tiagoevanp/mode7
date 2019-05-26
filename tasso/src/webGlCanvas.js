@@ -87,33 +87,33 @@ function calculatePercentageOfPoints(p, img) {
 }
 
 function calculatePointsPositionInZeroZ() {
-	const { cam, square } = state;
+	const { cam, camSquare } = state;
 
-	var lambda = cam.z/(cam.z-square.zA);
+	var lambda = cam.z/(cam.z-camSquare.A.z);
 	var pointA = {
-		x: lambda*(square.xA-cam.x)+cam.x,
-		y: lambda*(square.yA-cam.y)+cam.y,
+		x: lambda*(camSquare.A.x-cam.x)+cam.x,
+		y: lambda*(camSquare.A.y-cam.y)+cam.y,
 		z: 0
 	}
 
-	lambda = -cam.z/(square.zB-cam.z);
+	lambda = -cam.z/(camSquare.B.z-cam.z);
 	var pointB = {
-		x: lambda*(square.xB-cam.x)+cam.x,
-		y: lambda*(square.yB-cam.y)+cam.y,
+		x: lambda*(camSquare.B.x-cam.x)+cam.x,
+		y: lambda*(camSquare.B.y-cam.y)+cam.y,
 		z: 0
 	}
 
-	lambda = -cam.z/(square.zC-cam.z);
+	lambda = -cam.z/(camSquare.C.z-cam.z);
 	var pointC = {
-		x: lambda*(square.xC-cam.x)+cam.x,
-		y: lambda*(square.yC-cam.y)+cam.y,
+		x: lambda*(camSquare.C.x-cam.x)+cam.x,
+		y: lambda*(camSquare.C.y-cam.y)+cam.y,
 		z: 0
 	}
 
-	lambda = -cam.z/(square.zD-cam.z);
+	lambda = -cam.z/(camSquare.D.z-cam.z);
 	var pointD = {
-		x: lambda*(square.xD-cam.x)+cam.x,
-		y: lambda*(square.yD-cam.y)+cam.y,
+		x: lambda*(camSquare.D.x-cam.x)+cam.x,
+		y: lambda*(camSquare.D.y-cam.y)+cam.y,
 		z: 0
 	}
 	return {

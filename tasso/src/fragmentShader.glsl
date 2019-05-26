@@ -20,26 +20,28 @@ float lambda(vec2 p1, vec2 p2) {
 	return h/w;
 }
 
-float x(vec2 p1, vec2 p2, float y) {
+float u(vec2 p1, vec2 p2, float v) {
 	float l = lambda(p1, p2);
-	float x = p1.x - (y-p2.y)/l;
-	return x;
+	float u = p1.x - (v-p2.y)/l;
+	return u;
 }
 
 vec2 calculatePointsPosition(vec2 st) {
-	float y = pD.y+(pD.y+st.y*(pA.y-pD.y))*(st.y*(pA.y-pD.y));
+	float v = pD.y+(pD.y+st.y*(pA.y-pD.y))*(st.y*(pA.y-pD.y));
 
-	float D_A = x(pD, pA, y);
-	float C_B = x(pC, pB, 1.0);
+	float D_A = u(pD, pA, v);
+	float C_B = u(pC, pB, 1.0);
 
-	float x = D_A+st.x/6.0;
+	float u = D_A+st.x/6.0;
 
-	return vec2(x, y);
+	return vec2(u, v);
 }
 
 void main() {
 	vec2 st = gl_FragCoord.xy/u_resolution;
-	vec2 points = calculatePointsPosition(st);
+	// vec2 points = calculatePointsPosition(st);
 
-	gl_FragColor= texture2D(u_map, points);
+	vec2 Z = vec2(0, 0);
+
+	gl_FragColor= texture2D(u_map, Z);
 }
