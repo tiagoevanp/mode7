@@ -10,7 +10,7 @@
   "author": "Tasso Evangelista <tasso@tassoevan.me>",
   "license": "ISC",
   "dependencies": {
-    "three": "^0.104.0"
+    "three": "^0.125.0"
   },
   "devDependencies": {
     "file-loader": "^3.0.1",
